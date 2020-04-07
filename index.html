@@ -1,0 +1,185 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+<head>
+    <meta charset="utf-8">
+    <title>Nitrate Risk in WI</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="manifest" href="site.webmanifest">
+    <link rel="apple-touch-icon" href="favicon.png">
+    <!-- Place favicon.ico in the root directory -->
+
+    <link rel="stylesheet" href="css/normalize.css">
+    <!-- BOOTSTRAP STYLESHEET -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+      integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+      crossorigin=""/>
+    <!-- FONT AWESOME ICONS -->
+    <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Roboto+Condensed|Ubuntu&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="lib/leaflet-markercluster-1.4.1/MarkerCluster.Default.css">
+    <link rel="stylesheet" href="lib/leaflet-markercluster-1.4.1/MarkerCluster.css">
+    <link rel="stylesheet" href="lib/leaflet-sidebar-v2/css/leaflet-sidebar.css">
+    <link rel="stylesheet" href="lib/leaflet-zoomhome/leaflet.zoomhome.css">
+    <link rel="stylesheet" href="lib/leaflet-groupedlayercontrol-v0.6.1/dist/leaflet.groupedlayercontrol.min.css">
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/style.css">
+
+    <meta name="theme-color" content="#fafafa">
+</head>
+
+<body>
+    <!-- Add your site or application content here -->
+    
+    <!-- optionally define the sidebar content via HTML markup -->
+    <div id="sidebar" class="leaflet-sidebar collapsed">
+
+        <!-- nav tabs -->
+        <div class="leaflet-sidebar-tabs">
+            <!-- top aligned tabs -->
+            <ul role="tablist">
+                <li><a href="#home" role="tab"><i class="fa fa-bars active"></i></a></li>
+                <li><a href="#settings" role="tab"><i class="fa fa-cog"></i></a></li>
+                <li><a href="#information" role="tab"><i class="fa fa-info-circle"></i></a></li>
+            </ul>
+                
+            <!-- bottom aligned tabs -->
+            <ul role="tablist">
+                <li><a href="#developer" role="tab"><i class="fa fa-user"></i></a></li>
+            </ul>
+        </div>
+
+        <!-- panel content -->
+        <div class="leaflet-sidebar-content">
+            <div class="leaflet-sidebar-pane" id="home">
+                <h1 class="leaflet-sidebar-header">
+                    Nitrate Levels in Wisconsin
+                    <span class="leaflet-sidebar-close"><i class="fa fa-caret-left"></i></span>
+                </h1>
+
+                <h2>Background</h2>
+
+                <p>High nitrate concentrations in drinking water are a health hazard. To better understand this potential risk in Wisconsin, the Wisconsin Department of Natural Resources has provided has provided a dataset containing nitrate levels in group of test wells across the state. They also provided a dataset containing the number of reported cancer incidences throughout the state over a 10-year period aggregated at the census block level.</p>
+                
+                <p>Nitrate levels greater than 10 ppm exceed state and federal standards for nitrate in public drinking water supplies. Some researchers suspect that consuming nitrate-contaminated water may increase the risk of thyroid disease, diabetes, and certain types of cancer. People who have heart or lung disease, certain inherited enzyme defects or cancer may be more sensitive to the toxic effects of nitrate than healthy individuals.</p>
+                
+                <p>This map uses Inverse Distance Weighted (IDW) interpolation and Ordinary Least Squares (OLS) linear regression to examine the relationship, if any, between nitrate concentrations in water wells and cancer rates in Wisconsin.</p>
+                <br>
+                <br>
+                <p>Click the <i class="fa fa-cog"></i> icon in the sidebar to run IDW analysis</p>
+                
+            </div>
+
+            <div class="leaflet-sidebar-pane" id="settings">
+                <h1 class="leaflet-sidebar-header">
+                    Spatial Coorelation
+                    <span class="leaflet-sidebar-close"><i class="fa fa-caret-left"></i></span>
+                </h1>
+                
+                <h2>IDW Settings</h2>
+                
+                <p>The <b>distance decay coefficient (q)</b> is an exponent in the formula which determines how quickly the weight of a sampled value will decrease the further away it is from the unsampled location. The larger the distance decay coefficient, the quicker the weight of a sampled value decreases as its distance from the unsampled location increases. Typical values range between 1.5 and 2.5. To examine the relationship between nitrate levels in well water and cancer rates, select a <b>distance decay coefficient (q)</b> for the spatial interpolation and the <b>hexbin size</b> (sq. km).</p>
+                
+                <div id='ui-controls' class="ubuntu">
+                    <div id="fieldLabel"><label>Distance Decay Coefficient:</label></div>
+                    <div class="ubuntu-small">Enter a value between 1 and 20.</div>
+                    <input type="text" id="distanceDecayCoefficient" value="2">
+                    <div id="fieldLabel"><label>Hexbin Size:</label></div>
+                    <div class="ubuntu-small">Enter a value between 6 and 30.</div>
+                    <input type="text" id="hexbinArea" value="10">
+                    <br><br>
+                    <input id="submitButton" type="submit" value="Submit">
+                    <input id="resetButton" type="submit" value="Reset">
+                    <br><br>
+                    <div id="regressionEquationLabel"><label>Regression Equation:</label></div> 
+                    <div id="regressionEquation"></div>
+                    <div id="rSquaredLabel"><label>R-Squared:</label></div>                    
+                    <div id="rSquared"></div>
+                </div>
+            </div>
+            
+            <div class="leaflet-sidebar-pane" id="information">
+                <h1 class="leaflet-sidebar-header">
+                    Resources
+                    <span class="leaflet-sidebar-close"><i class="fa fa-caret-left"></i></span>
+                </h1>
+
+                <h2>Learn More</h2>
+
+                <p>Data from the Wisconsin Departement of Health Services (DHS) and Department of Natural Resources (DNR) regarding nitrate levels in drinking water and private wells is available to the public. The links below provide further reading on why nitrate levels are important to monitor, and what potential impacts they may have on your health.</p>
+                
+                <p>
+                    <li>
+                        <a href="https://www.dhs.wisconsin.gov/water/nitrate.htm" target="_blank">&nbsp;WI DHS - Nitrates in Well Water</a>
+                    </li>
+                    <li>
+                        <a href="https://dnr.wi.gov/topic/groundwater/documents/GCC/GwQuality/Nitrate.pdf" target="_blank">&nbsp;WI DNR - Groundwater Coordinating Council Report to the Legislature (2019)</a>
+                    </li>
+                </p>
+            </div>
+            
+            <div class="leaflet-sidebar-pane" id="developer">
+                <h1 class="leaflet-sidebar-header">
+                    Developer Information
+                    <span class="leaflet-sidebar-close"><i class="fa fa-caret-left"></i></span>
+                </h1>
+                
+                <h2>Project Backgound</h2>
+                
+                <p>This project was developed as part of Geography 777 in the GIS and Web Map Programming Master's program at University of Wisconsin Madison.</p>
+                
+                <p>The data used in this project is a fictitions set of data and not meant to be a representation of any real world risks regardning nitrates in well water in the state of Wisconsin.</p>
+                
+                <h2>Link to Github</h2>
+                
+                <p class="ubuntu">
+                    <li><i class="fa fa-github"></i><a class="ubuntu" href="https://github.com/huntermray" target="_blank">&nbsp;Hunter M Ray</a></li>
+                </p>
+            </div>   
+            
+        </div>
+    </div>
+
+    <div id="map" class="container-fluid"></div>
+    
+    <!-- Load Modernizer JS -->
+    <script src="js/vendor/modernizr-3.8.0.min.js"></script>
+    <!-- Load JQuery JS -->
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"
+            integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+            crossorigin="anonymous"></script>
+    <!-- Load Popper JS from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <!-- Load Bootstrap JS from CDN -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+    <script>window.jQuery || document.write('<script src="js/vendor/jquery-3.4.1.min.js"><\/script>')</script>
+    <!-- Load Leaflet JS from CDN -->
+    <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js"
+            integrity="sha512-gZwIG9x3wUXg2hdXF6+rVkLF/0Vi9U8D2Ntg4Ga5I5BZpVkVxlJWbSQtXPSiUTtC0TjtGOmxa1AJPuV0CPthew=="
+            crossorigin=""></script>
+    <!-- Load Esri Leaflet JS from CDN -->
+    <script src="https://unpkg.com/esri-leaflet/dist/esri-leaflet.js"></script>
+    <!-- Load SimpleStats library JS from CDN -->
+    <script src="https://unpkg.com/simple-statistics@7.0.8/dist/simple-statistics.min.js"></script>
+    <!-- Load Leaflet MarkerCluster JS -->
+    <script src="lib/leaflet-markercluster-1.4.1/leaflet.markercluster.js"></script>
+    <!-- Load Leaflet SideBar v2 JS -->
+    <script src="lib/leaflet-sidebar-v2/js/leaflet-sidebar.js"></script>
+    <!-- Load Leaflet ZoomHome JS -->
+    <script src="lib/leaflet-zoomhome/leaflet.zoomhome.min.js"></script>
+    <!-- Load Leaflet Grouped Layer Control JS -->
+    <script src="lib/leaflet-groupedlayercontrol-v0.6.1/dist/leaflet.groupedlayercontrol.min.js"></script>
+    <!-- Load Leaflet EasyPrint JS -->
+    <script src="lib/leaflet-easyPrint-gh-pages/dist/bundle.js"></script>
+    <script src="//api.tiles.mapbox.com/mapbox.js/plugins/leaflet-image/v0.0.4/leaflet-image.js"></script>
+    <!-- Load Turf JS from CDN-->
+    <script src='https://npmcdn.com/@turf/turf/turf.min.js'></script>
+    <!-- Load local JS -->
+    <script src="js/plugins.js"></script>
+    <script src="js/main.js"></script>
+</body>
+
+</html>
